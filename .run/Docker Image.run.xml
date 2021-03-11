@@ -23,7 +23,7 @@
           <list>
             <DockerVolumeBindingImpl>
               <option name="containerPath" value="/etcd-data" />
-              <option name="hostPath" value="D:\app\etcd\etcd-data.tmp" />
+              <option name="hostPath" value="D:\workplace\template\project_temp\temp\etcd-data.tmp" />
             </DockerVolumeBindingImpl>
           </list>
         </option>
