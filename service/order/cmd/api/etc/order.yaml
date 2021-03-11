@@ -1,13 +1,13 @@
 Name: order
 Host: 0.0.0.0
 Port: 8888
-Log:
-  Mode: file
-  Path: ./logs
-  Level: info
-  Compress: false
-  KeepDays: 30
-  StackCooldownMillis: 100
+#Log:
+#  Mode: file
+#  Path: ./logs
+#  Level: info
+#  Compress: false
+#  KeepDays: 30
+#  StackCooldownMillis: 100
 UserRpc:
   Etcd:
     Hosts:

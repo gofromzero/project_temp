@@ -17,6 +17,10 @@ type (
 		Name string `json:"name"`
 	}
 )
+
+@server(
+	middleware: Cros,Auth
+)
 service order {
 	@handler getOrder
 	get /api/order/get/:id (OrderReq) returns (OrderReply)
