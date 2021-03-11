@@ -1,0 +1,23 @@
+syntax = "v1"
+
+info(
+	title: "order api"
+	desc: "订单api"
+	author: "spume"
+	email: "1291953408@qq.com"
+	version: "v0.0.1"
+)
+type (
+	OrderReq {
+		Id string `path:"id"`
+	}
+
+	OrderReply {
+		Id   string `json:"id"`
+		Name string `json:"name"`
+	}
+)
+service order {
+	@handler getOrder
+	get /api/order/get/:id (OrderReq) returns (OrderReply)
+}
