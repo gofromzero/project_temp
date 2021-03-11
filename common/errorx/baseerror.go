@@ -14,15 +14,21 @@ type CodeErrorResponse struct {
 	Details []string `json:"details"`
 }
 
-func NewCodeError(code int, msg string) error {
-	return &CodeError{Code: code, Msg: msg}
+func NewCodeError(code int, msg string, details ...error) *CodeError {
+	return &CodeError{Code: code, Msg: msg, Details: details}
 }
 
 func NewDefaultError(msg string) error {
 	return NewCodeError(defaultCode, msg)
 }
-func (e *CodeError) With(err ...error) {
+func (e *CodeError) With(err ...error) *CodeError {
 	e.Details = append(e.Details, err...)
+	return e
+}
+
+func (e *CodeError) WithMsg(msg string) *CodeError {
+	e.Msg = msg
+	return e
 }
 
 func (e *CodeError) Error() string {

@@ -1,10 +1,10 @@
 Name: user.rpc
-ListenOn: 127.0.0.1:8080
+ListenOn: 0.0.0.0:8080
 Etcd:
   Hosts:
-  - 127.0.0.1:2379
+  - 172.17.0.1:2379
   Key: user.rpc
 Mysql:
-  DataSource: 3
+  DataSource: $user:$password@tcp($ip:$port)/$db?$queries
 Cache:
   - Host: localhost:6379
