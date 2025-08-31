@@ -11,7 +11,7 @@ import (
 
 func TestNewLoggingMiddleware(t *testing.T) {
 	middleware := middleware.NewLoggingMiddleware()
-	
+
 	assert.NotNil(t, middleware, "NewLoggingMiddleware should return a non-nil instance")
 }
 
@@ -35,7 +35,7 @@ func TestLoggingMiddleware_RequestLogger_ContextValidation(t *testing.T) {
 
 			// Test context validation
 			ctx := context.Background()
-			
+
 			// Simulate request ID injection (this would normally be done by the middleware)
 			if tt.expectValue {
 				ctx = context.WithValue(ctx, tt.contextKey, "test-request-id")
@@ -50,7 +50,7 @@ func TestLoggingMiddleware_RequestLogger_ContextValidation(t *testing.T) {
 func TestLoggingMiddleware_ErrorLogger_PanicRecovery(t *testing.T) {
 	middleware := middleware.NewLoggingMiddleware()
 	require.NotNil(t, middleware, "Middleware should be initialized")
-	
+
 	// Test that error logger structure is correct
 	assert.NotNil(t, middleware, "ErrorLogger middleware should be available for panic recovery")
 }
@@ -61,12 +61,12 @@ func TestLoggingMiddleware_LogStructure(t *testing.T) {
 		"request_id",
 		"method",
 		"path",
-		"status_code", 
+		"status_code",
 		"duration_ms",
 		"response_size",
 		"timestamp",
 	}
-	
+
 	// Validate that all required fields are accounted for in logging logic
 	for _, field := range expectedFields {
 		assert.NotEmpty(t, field, "Required log field should not be empty: %s", field)

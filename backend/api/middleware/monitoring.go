@@ -19,18 +19,18 @@ func NewMonitoringMiddleware() *MonitoringMiddleware {
 func (m *MonitoringMiddleware) MetricsCollector(r *ghttp.Request) {
 	// Record start time
 	startTime := time.Now()
-	
+
 	// Continue with request processing
 	r.Middleware.Next()
-	
+
 	// Calculate processing time
 	duration := time.Since(startTime)
-	
+
 	// Get request details
 	method := r.Method
 	path := r.URL.Path
 	statusCode := r.Response.Status
-	
+
 	// Record metrics
 	metrics := utils.GetMetrics()
 	metrics.RecordHttpRequest(method, path, duration, statusCode)

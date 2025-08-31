@@ -11,7 +11,7 @@ func TestDatabaseIndexStrategy(t *testing.T) {
 		// 所有表都应该有UUID主键 (varchar(36))
 		primaryKeys := map[string]string{
 			"tenants":          "id",
-			"users":            "id", 
+			"users":            "id",
 			"roles":            "id",
 			"permissions":      "id",
 			"user_roles":       "id",
@@ -29,7 +29,7 @@ func TestDatabaseIndexStrategy(t *testing.T) {
 		// 关键的租户隔离索引
 		tenantIndexes := map[string][]string{
 			"users":      {"idx_users_tenant_id"},
-			"roles":      {"idx_roles_tenant_id"}, 
+			"roles":      {"idx_roles_tenant_id"},
 			"audit_logs": {"idx_audit_logs_tenant_id"},
 		}
 
@@ -45,8 +45,8 @@ func TestDatabaseIndexStrategy(t *testing.T) {
 		// 业务逻辑唯一约束
 		uniqueConstraints := map[string][]string{
 			"tenants": {
-				"uk_tenants_code",  // 租户代码全局唯一
-				"uk_tenants_name",  // 租户名称全局唯一
+				"uk_tenants_code", // 租户代码全局唯一
+				"uk_tenants_name", // 租户名称全局唯一
 			},
 			"users": {
 				"uk_users_tenant_username", // 租户内用户名唯一
@@ -69,7 +69,7 @@ func TestDatabaseIndexStrategy(t *testing.T) {
 		for table, constraints := range uniqueConstraints {
 			assert.NotEmpty(t, table)
 			assert.NotEmpty(t, constraints)
-			
+
 			// 验证约束命名规范
 			for _, constraint := range constraints {
 				assert.Contains(t, constraint, "uk_") // 唯一约束前缀
@@ -160,7 +160,7 @@ func TestQueryPerformancePatterns(t *testing.T) {
 				useIndex:    "idx_users_tenant_id",
 			},
 			{
-				description: "租户角色查询", 
+				description: "租户角色查询",
 				pattern:     "SELECT * FROM roles WHERE tenant_id = ? AND is_system = false",
 				useIndex:    "idx_roles_tenant_id",
 			},
@@ -192,7 +192,7 @@ func TestQueryPerformancePatterns(t *testing.T) {
 			},
 			{
 				loginType: "邮箱登录",
-				pattern:   "SELECT * FROM users WHERE tenant_id = ? AND email = ?", 
+				pattern:   "SELECT * FROM users WHERE tenant_id = ? AND email = ?",
 				useIndex:  "uk_users_tenant_email",
 			},
 		}
@@ -216,10 +216,10 @@ func TestQueryPerformancePatterns(t *testing.T) {
 
 		// 这个查询应该高效使用多个索引
 		expectedIndexUsage := []string{
-			"PRIMARY (users.id)",                         // 用户主键查找
-			"idx_user_roles_user_id",                     // 用户角色关联
-			"idx_role_permissions_role_id",               // 角色权限关联  
-			"uk_permissions_code",                        // 权限代码查找
+			"PRIMARY (users.id)",           // 用户主键查找
+			"idx_user_roles_user_id",       // 用户角色关联
+			"idx_role_permissions_role_id", // 角色权限关联
+			"uk_permissions_code",          // 权限代码查找
 		}
 
 		assert.NotEmpty(t, rbacQuery)
@@ -267,12 +267,12 @@ func TestIndexMaintenanceStrategy(t *testing.T) {
 	t.Run("验证索引监控要求", func(t *testing.T) {
 		// 需要监控的索引使用情况
 		criticalIndexes := []string{
-			"idx_users_tenant_id",           // 多租户隔离关键
-			"uk_users_tenant_username",      // 登录性能关键
-			"uk_users_tenant_email",         // 登录性能关键
+			"idx_users_tenant_id",             // 多租户隔离关键
+			"uk_users_tenant_username",        // 登录性能关键
+			"uk_users_tenant_email",           // 登录性能关键
 			"idx_audit_logs_tenant_timestamp", // 日志查询关键
-			"idx_user_roles_user_id",        // RBAC性能关键
-			"idx_role_permissions_role_id",  // RBAC性能关键
+			"idx_user_roles_user_id",          // RBAC性能关键
+			"idx_role_permissions_role_id",    // RBAC性能关键
 		}
 
 		for _, index := range criticalIndexes {
@@ -288,8 +288,8 @@ func TestIndexMaintenanceStrategy(t *testing.T) {
 		// audit_logs表需要特别的维护策略
 		auditLogMaintenance := map[string]string{
 			"partition_strategy": "按月分区基于timestamp",
-			"archival_policy":   "保留2年活跃数据",
-			"index_maintenance": "定期重建timestamp相关索引",
+			"archival_policy":    "保留2年活跃数据",
+			"index_maintenance":  "定期重建timestamp相关索引",
 			"performance_target": "日志查询<100ms",
 		}
 

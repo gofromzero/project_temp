@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/gogf/gf/v2/util/guid"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/util/guid"
 )
 
 // LoggingMiddleware provides HTTP request logging functionality
@@ -21,13 +21,13 @@ func NewLoggingMiddleware() *LoggingMiddleware {
 func (m *LoggingMiddleware) RequestLogger(r *ghttp.Request) {
 	// Generate unique request ID
 	requestID := guid.S()
-	
+
 	// Store request ID in context for potential use by other handlers
 	r.SetCtx(context.WithValue(r.Context(), "request_id", requestID))
-	
+
 	// Record start time
 	startTime := time.Now()
-	
+
 	// Log incoming request
 	g.Log().Info(r.Context(), "HTTP Request Started", g.Map{
 		"request_id":  requestID,
@@ -38,14 +38,14 @@ func (m *LoggingMiddleware) RequestLogger(r *ghttp.Request) {
 		"user_agent":  r.Header.Get("User-Agent"),
 		"timestamp":   startTime.Format(time.RFC3339),
 	})
-	
+
 	// Continue with request processing
 	r.Middleware.Next()
-	
+
 	// Calculate processing time
 	duration := time.Since(startTime)
 	statusCode := r.Response.Status
-	
+
 	// Determine log level based on status code
 	logLevel := "Info"
 	if statusCode >= 400 && statusCode < 500 {
@@ -53,7 +53,7 @@ func (m *LoggingMiddleware) RequestLogger(r *ghttp.Request) {
 	} else if statusCode >= 500 {
 		logLevel = "Error"
 	}
-	
+
 	// Log completed request
 	logData := g.Map{
 		"request_id":    requestID,
@@ -64,7 +64,7 @@ func (m *LoggingMiddleware) RequestLogger(r *ghttp.Request) {
 		"response_size": r.Response.BufferLength(),
 		"timestamp":     time.Now().Format(time.RFC3339),
 	}
-	
+
 	switch logLevel {
 	case "Error":
 		g.Log().Error(r.Context(), "HTTP Request Completed with Error", logData)
@@ -84,7 +84,7 @@ func (m *LoggingMiddleware) ErrorLogger(r *ghttp.Request) {
 			if requestID == nil {
 				requestID = "unknown"
 			}
-			
+
 			g.Log().Error(r.Context(), "HTTP Request Panic", g.Map{
 				"request_id": requestID,
 				"method":     r.Method,
@@ -92,11 +92,11 @@ func (m *LoggingMiddleware) ErrorLogger(r *ghttp.Request) {
 				"error":      err,
 				"timestamp":  time.Now().Format(time.RFC3339),
 			})
-			
+
 			// Return 500 error
 			r.Response.WriteStatusExit(500, "Internal Server Error")
 		}
 	}()
-	
+
 	r.Middleware.Next()
 }

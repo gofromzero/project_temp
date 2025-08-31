@@ -31,11 +31,11 @@ func TestDatabaseConnection() (err error) {
 
 	_, dbErr := db.Query(ctx, "SELECT 1")
 	duration := time.Since(startTime)
-	
+
 	// Record metrics
 	metrics := GetMetrics()
 	metrics.RecordDatabaseQuery(duration)
-	
+
 	if dbErr != nil {
 		return fmt.Errorf("database connection failed: %w", dbErr)
 	}
@@ -45,7 +45,7 @@ func TestDatabaseConnection() (err error) {
 // TestRedisConnection tests Redis connectivity
 // Uses configuration from GoFrame config or falls back to localhost:6379
 func TestRedisConnection() (err error) {
-	
+
 	// Default Redis address
 	addr := "localhost:6379"
 
@@ -72,7 +72,7 @@ func TestRedisConnection() (err error) {
 	defer cancel()
 
 	err = client.Ping(ctx).Err()
-	
+
 	// Record metrics - assume Redis connection successful (cache hit)
 	// In a real application, you'd differentiate between hits/misses
 	metrics := GetMetrics()
@@ -82,7 +82,7 @@ func TestRedisConnection() (err error) {
 	} else {
 		metrics.RecordCacheMiss()
 	}
-	
+
 	if err != nil {
 		return fmt.Errorf("redis connection failed to %s: %w", addr, err)
 	}

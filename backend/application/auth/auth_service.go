@@ -13,15 +13,15 @@ import (
 )
 
 var (
-	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrUserLocked        = errors.New("user account is locked")
-	ErrUserInactive      = errors.New("user account is inactive")
-	ErrTenantNotFound    = errors.New("tenant not found")
-	ErrTenantSuspended   = errors.New("tenant is suspended or disabled")
-	ErrTooManyAttempts   = errors.New("too many login attempts, account locked")
-	ErrEmailAlreadyExists = errors.New("email already exists")
+	ErrInvalidCredentials    = errors.New("invalid credentials")
+	ErrUserLocked            = errors.New("user account is locked")
+	ErrUserInactive          = errors.New("user account is inactive")
+	ErrTenantNotFound        = errors.New("tenant not found")
+	ErrTenantSuspended       = errors.New("tenant is suspended or disabled")
+	ErrTooManyAttempts       = errors.New("too many login attempts, account locked")
+	ErrEmailAlreadyExists    = errors.New("email already exists")
 	ErrUsernameAlreadyExists = errors.New("username already exists")
-	ErrUnauthorized      = errors.New("unauthorized access")
+	ErrUnauthorized          = errors.New("unauthorized access")
 )
 
 // LoginRequest represents login request data
@@ -33,9 +33,9 @@ type LoginRequest struct {
 
 // LoginResponse represents login response data
 type LoginResponse struct {
-	Token        string            `json:"token"`
-	RefreshToken string            `json:"refreshToken"`
-	User         *UserInfo         `json:"user"`
+	Token        string    `json:"token"`
+	RefreshToken string    `json:"refreshToken"`
+	User         *UserInfo `json:"user"`
 }
 
 // RegisterRequest represents user registration request data
@@ -56,21 +56,21 @@ type RegisterResponse struct {
 
 // UserInfo represents user information in response
 type UserInfo struct {
-	ID       string              `json:"id"`
-	TenantID *string             `json:"tenantId,omitempty"`
-	Username string              `json:"username"`
-	Email    string              `json:"email"`
-	Profile  user.UserProfile    `json:"profile"`
-	Status   user.UserStatus     `json:"status"`
-	Roles    []string            `json:"roles"`
-	IsAdmin  bool                `json:"isAdmin"`
+	ID       string           `json:"id"`
+	TenantID *string          `json:"tenantId,omitempty"`
+	Username string           `json:"username"`
+	Email    string           `json:"email"`
+	Profile  user.UserProfile `json:"profile"`
+	Status   user.UserStatus  `json:"status"`
+	Roles    []string         `json:"roles"`
+	IsAdmin  bool             `json:"isAdmin"`
 }
 
 // AuthService handles authentication operations
 type AuthService struct {
-	jwtManager     *utils.JWTManager
-	userRepo       user.UserRepository
-	tenantRepo     tenant.TenantRepository
+	jwtManager *utils.JWTManager
+	userRepo   user.UserRepository
+	tenantRepo tenant.TenantRepository
 }
 
 // NewAuthService creates a new authentication service
@@ -327,7 +327,7 @@ func (s *AuthService) Register(ctx context.Context, req *RegisterRequest, adminU
 func (s *AuthService) getUserByEmailAndTenant(ctx context.Context, email string, tenantCode *string) (*user.User, *tenant.Tenant, error) {
 	var targetTenant *tenant.Tenant
 	var targetTenantID *string
-	
+
 	// If tenant code is provided, find the tenant
 	if tenantCode != nil && *tenantCode != "" {
 		foundTenant, err := s.tenantRepo.GetByCode(*tenantCode)
@@ -339,14 +339,14 @@ func (s *AuthService) getUserByEmailAndTenant(ctx context.Context, email string,
 		targetTenantID = &foundTenant.ID
 	}
 	// If no tenant code provided, user must be system admin (tenantID will be nil)
-	
+
 	// Find user by email and tenant ID
 	foundUser, err := s.userRepo.GetByEmail(targetTenantID, email)
 	if err != nil {
 		g.Log().Warning(ctx, "User not found by email:", email, "tenantID:", targetTenantID, "error:", err)
 		return nil, nil, ErrInvalidCredentials
 	}
-	
+
 	return foundUser, targetTenant, nil
 }
 
@@ -356,7 +356,7 @@ func (s *AuthService) getUserByID(ctx context.Context, userID string) (*user.Use
 		g.Log().Warning(ctx, "User not found by ID:", userID, "error:", err)
 		return nil, nil, ErrInvalidCredentials
 	}
-	
+
 	var foundTenant *tenant.Tenant
 	if foundUser.TenantID != nil {
 		foundTenant, err = s.tenantRepo.GetByID(*foundUser.TenantID)
@@ -364,7 +364,7 @@ func (s *AuthService) getUserByID(ctx context.Context, userID string) (*user.Use
 			g.Log().Warning(ctx, "Tenant not found for user:", userID, "tenantID:", *foundUser.TenantID, "error:", err)
 		}
 	}
-	
+
 	return foundUser, foundTenant, nil
 }
 
@@ -376,7 +376,7 @@ func (s *AuthService) checkLoginAttempts(ctx context.Context, userID string) err
 		// If Redis error, allow login (fail open)
 		return nil
 	}
-	
+
 	if attempts.Int() >= 5 {
 		return ErrTooManyAttempts
 	}

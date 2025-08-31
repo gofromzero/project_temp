@@ -11,7 +11,7 @@ import (
 // runMigrations executes database migrations
 func runMigrations(ctx context.Context) error {
 	db := g.DB()
-	
+
 	// Execute the main schema migration
 	schemaMigration := `
 -- Create tenants table
@@ -77,7 +77,7 @@ func handleMigrate(ctx context.Context) {
 	}
 
 	direction := os.Args[2]
-	
+
 	switch direction {
 	case "up":
 		err := runMigrations(ctx)
@@ -85,7 +85,7 @@ func handleMigrate(ctx context.Context) {
 			glog.Fatal(ctx, "Migration failed:", err)
 		}
 		glog.Info(ctx, "Migration up completed")
-		
+
 	case "down":
 		glog.Info(ctx, "Migration down - dropping all tables")
 		err := rollbackMigrations(ctx)
@@ -93,7 +93,7 @@ func handleMigrate(ctx context.Context) {
 			glog.Fatal(ctx, "Rollback failed:", err)
 		}
 		glog.Info(ctx, "Migration down completed")
-		
+
 	default:
 		glog.Error(ctx, "Unknown migration direction:", direction)
 	}
@@ -102,17 +102,17 @@ func handleMigrate(ctx context.Context) {
 // rollbackMigrations drops all tables in reverse dependency order
 func rollbackMigrations(ctx context.Context) error {
 	db := g.DB()
-	
+
 	tables := []string{
 		"audit_logs",
-		"role_permissions", 
+		"role_permissions",
 		"user_roles",
 		"permissions",
 		"roles",
 		"users",
 		"tenants",
 	}
-	
+
 	for _, table := range tables {
 		_, err := db.Exec(ctx, "DROP TABLE IF EXISTS `"+table+"`")
 		if err != nil {
@@ -120,6 +120,6 @@ func rollbackMigrations(ctx context.Context) error {
 		}
 		glog.Info(ctx, "Dropped table:", table)
 	}
-	
+
 	return nil
 }

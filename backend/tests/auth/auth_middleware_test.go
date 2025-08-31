@@ -14,18 +14,18 @@ import (
 // AuthMiddlewareTestSuite is the test suite for authentication middleware
 type AuthMiddlewareTestSuite struct {
 	suite.Suite
-	userRepo     *MockUserRepository
-	tenantRepo   *MockTenantRepository
-	authService  *auth.AuthService
-	middleware   *middleware.AuthMiddleware
-	jwtManager   *utils.JWTManager
+	userRepo    *MockUserRepository
+	tenantRepo  *MockTenantRepository
+	authService *auth.AuthService
+	middleware  *middleware.AuthMiddleware
+	jwtManager  *utils.JWTManager
 }
 
 // SetupSuite sets up the test suite
 func (suite *AuthMiddlewareTestSuite) SetupSuite() {
 	suite.userRepo = new(MockUserRepository)
 	suite.tenantRepo = new(MockTenantRepository)
-	
+
 	var err error
 	suite.authService, err = auth.NewAuthService(suite.userRepo, suite.tenantRepo)
 	suite.Require().NoError(err)
@@ -61,7 +61,7 @@ func (suite *AuthMiddlewareTestSuite) createTestToken(userID string, tenantID *s
 func (suite *AuthMiddlewareTestSuite) TestMiddlewareCreation() {
 	// Test that middleware is created with auth service and JWT manager
 	suite.NotNil(suite.middleware, "Middleware should be created successfully")
-	
+
 	// Test that new middleware can be created with different public paths
 	publicPaths := []string{"/public", "/health"}
 	newMiddleware, err := middleware.NewAuthMiddleware(suite.authService, publicPaths)
@@ -85,7 +85,7 @@ func (suite *AuthMiddlewareTestSuite) TestJWTTokenValidation() {
 func (suite *AuthMiddlewareTestSuite) TestAuthServiceIntegration() {
 	// Test that auth service is accessible and functional
 	suite.NotNil(suite.authService, "Auth service should be available")
-	
+
 	// Test that JWT manager is properly configured
 	suite.NotNil(suite.jwtManager, "JWT manager should be available")
 	suite.NotEmpty(suite.jwtManager.Config.SecretKey, "JWT manager should have secret key configured")

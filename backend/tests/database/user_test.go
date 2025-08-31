@@ -61,17 +61,17 @@ func TestUserEntity(t *testing.T) {
 
 	t.Run("密码哈希和验证", func(t *testing.T) {
 		u := &user.User{ID: "user-789"}
-		
+
 		password := "testpassword123"
 		err := u.SetPassword(password)
 		require.NoError(t, err)
-		
+
 		assert.NotEmpty(t, u.HashedPassword)
 		assert.NotEqual(t, password, u.HashedPassword)
-		
+
 		// 验证正确密码
 		assert.True(t, u.CheckPassword(password))
-		
+
 		// 验证错误密码
 		assert.False(t, u.CheckPassword("wrongpassword"))
 	})
@@ -79,7 +79,7 @@ func TestUserEntity(t *testing.T) {
 	t.Run("用户资料获取", func(t *testing.T) {
 		avatar := "https://example.com/avatar.jpg"
 		phone := "+1234567890"
-		
+
 		u := &user.User{
 			FirstName: "John",
 			LastName:  "Doe",
@@ -105,11 +105,11 @@ func TestUserEntity(t *testing.T) {
 
 	t.Run("更新最后登录时间", func(t *testing.T) {
 		u := &user.User{ID: "user-login-test"}
-		
+
 		assert.Nil(t, u.LastLoginAt)
-		
+
 		u.UpdateLastLogin()
-		
+
 		require.NotNil(t, u.LastLoginAt)
 		assert.True(t, time.Since(*u.LastLoginAt) < time.Second)
 	})
@@ -126,7 +126,7 @@ func TestUserEntity(t *testing.T) {
 		}
 
 		user2 := &user.User{
-			ID:       "user-2", 
+			ID:       "user-2",
 			TenantID: &tenant2ID,
 			Username: "user1", // 同名用户在不同租户下应该被允许
 			Email:    "user1@tenant2.com",
@@ -150,7 +150,7 @@ func TestUserProfile(t *testing.T) {
 	t.Run("用户资料结构", func(t *testing.T) {
 		avatar := "avatar.jpg"
 		phone := "123-456-7890"
-		
+
 		profile := user.UserProfile{
 			FirstName: "Alice",
 			LastName:  "Johnson",

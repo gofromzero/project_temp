@@ -15,7 +15,7 @@ import (
 func TestTenantService_CreateTenant_ValidRequest(t *testing.T) {
 	// Skip tests that require database connection
 	t.Skip("Skipping application service tests that require database connection")
-	
+
 	service := tenant.NewTenantService()
 	require.NotNil(t, service)
 
@@ -149,14 +149,14 @@ func TestNewTenantService(t *testing.T) {
 	// This test verifies service creation without database connection
 	// Skip if database is required
 	t.Skip("Skipping service creation test that requires database connection")
-	
+
 	service := tenant.NewTenantService()
 	assert.NotNil(t, service)
 }
 
 func TestTenantService_StructureValidation(t *testing.T) {
 	// Test that request/response structures are properly defined
-	
+
 	// Test CreateTenantRequest structure
 	req := tenant.CreateTenantRequest{
 		Name: "Test",

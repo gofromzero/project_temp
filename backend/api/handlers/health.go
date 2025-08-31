@@ -24,8 +24,8 @@ type ComponentStatus struct {
 
 // HealthResponse represents the complete health check response
 type HealthResponse struct {
-	Status     string                      `json:"status"`    // Overall system status
-	Components map[string]ComponentStatus  `json:"components"` // Individual component statuses
+	Status     string                     `json:"status"`     // Overall system status
+	Components map[string]ComponentStatus `json:"components"` // Individual component statuses
 	Timestamp  string                     `json:"timestamp"`  // ISO 8601 timestamp
 }
 

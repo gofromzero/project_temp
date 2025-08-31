@@ -12,112 +12,6 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-// MockUserRepository is a mock implementation of user.UserRepository
-type MockUserRepository struct {
-	mock.Mock
-}
-
-func (m *MockUserRepository) Create(user *user.User) error {
-	args := m.Called(user)
-	return args.Error(0)
-}
-
-func (m *MockUserRepository) GetByID(id string) (*user.User, error) {
-	args := m.Called(id)
-	return args.Get(0).(*user.User), args.Error(1)
-}
-
-func (m *MockUserRepository) GetByUsername(tenantID *string, username string) (*user.User, error) {
-	args := m.Called(tenantID, username)
-	return args.Get(0).(*user.User), args.Error(1)
-}
-
-func (m *MockUserRepository) GetByEmail(tenantID *string, email string) (*user.User, error) {
-	args := m.Called(tenantID, email)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*user.User), args.Error(1)
-}
-
-func (m *MockUserRepository) GetByTenantID(tenantID string, offset, limit int) ([]*user.User, error) {
-	args := m.Called(tenantID, offset, limit)
-	return args.Get(0).([]*user.User), args.Error(1)
-}
-
-func (m *MockUserRepository) GetSystemAdmins(offset, limit int) ([]*user.User, error) {
-	args := m.Called(offset, limit)
-	return args.Get(0).([]*user.User), args.Error(1)
-}
-
-func (m *MockUserRepository) Update(user *user.User) error {
-	args := m.Called(user)
-	return args.Error(0)
-}
-
-func (m *MockUserRepository) Delete(id string) error {
-	args := m.Called(id)
-	return args.Error(0)
-}
-
-func (m *MockUserRepository) Count(tenantID *string) (int64, error) {
-	args := m.Called(tenantID)
-	return args.Get(0).(int64), args.Error(1)
-}
-
-func (m *MockUserRepository) ExistsByUsername(tenantID *string, username string) (bool, error) {
-	args := m.Called(tenantID, username)
-	return args.Bool(0), args.Error(1)
-}
-
-func (m *MockUserRepository) ExistsByEmail(tenantID *string, email string) (bool, error) {
-	args := m.Called(tenantID, email)
-	return args.Bool(0), args.Error(1)
-}
-
-// MockTenantRepository is a mock implementation of tenant.TenantRepository
-type MockTenantRepository struct {
-	mock.Mock
-}
-
-func (m *MockTenantRepository) Create(tenant *tenant.Tenant) error {
-	args := m.Called(tenant)
-	return args.Error(0)
-}
-
-func (m *MockTenantRepository) GetByID(id string) (*tenant.Tenant, error) {
-	args := m.Called(id)
-	return args.Get(0).(*tenant.Tenant), args.Error(1)
-}
-
-func (m *MockTenantRepository) GetByCode(code string) (*tenant.Tenant, error) {
-	args := m.Called(code)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*tenant.Tenant), args.Error(1)
-}
-
-func (m *MockTenantRepository) Update(tenant *tenant.Tenant) error {
-	args := m.Called(tenant)
-	return args.Error(0)
-}
-
-func (m *MockTenantRepository) Delete(id string) error {
-	args := m.Called(id)
-	return args.Error(0)
-}
-
-func (m *MockTenantRepository) List(offset, limit int) ([]*tenant.Tenant, error) {
-	args := m.Called(offset, limit)
-	return args.Get(0).([]*tenant.Tenant), args.Error(1)
-}
-
-func (m *MockTenantRepository) Count() (int64, error) {
-	args := m.Called()
-	return args.Get(0).(int64), args.Error(1)
-}
-
 // AuthServiceIntegrationTestSuite is the test suite for auth service integration tests
 type AuthServiceIntegrationTestSuite struct {
 	suite.Suite
@@ -130,7 +24,7 @@ type AuthServiceIntegrationTestSuite struct {
 func (suite *AuthServiceIntegrationTestSuite) SetupSuite() {
 	suite.userRepo = new(MockUserRepository)
 	suite.tenantRepo = new(MockTenantRepository)
-	
+
 	var err error
 	suite.authService, err = auth.NewAuthService(suite.userRepo, suite.tenantRepo)
 	suite.Require().NoError(err)
@@ -156,11 +50,11 @@ func (suite *AuthServiceIntegrationTestSuite) createTestUser(email, password str
 		LastName:  "User",
 		Status:    user.StatusActive,
 	}
-	
+
 	// Set password using bcrypt
 	err := testUser.SetPassword(password)
 	suite.Require().NoError(err)
-	
+
 	return testUser
 }
 
@@ -180,7 +74,7 @@ func (suite *AuthServiceIntegrationTestSuite) TestSuccessfulTenantLogin() {
 	ctx := context.Background()
 	testTenant := suite.createTestTenant()
 	testUser := suite.createTestUser("test@example.com", "password123", &testTenant.ID)
-	
+
 	suite.tenantRepo.On("GetByCode", "TEST").Return(testTenant, nil)
 	suite.userRepo.On("GetByEmail", &testTenant.ID, "test@example.com").Return(testUser, nil)
 	suite.userRepo.On("Update", mock.AnythingOfType("*user.User")).Return(nil)
@@ -215,7 +109,7 @@ func (suite *AuthServiceIntegrationTestSuite) TestSuccessfulSystemAdminLogin() {
 	// Arrange
 	ctx := context.Background()
 	testUser := suite.createTestUser("admin@system.com", "adminpass123", nil) // System admin has nil tenant
-	
+
 	suite.userRepo.On("GetByEmail", (*string)(nil), "admin@system.com").Return(testUser, nil)
 	suite.userRepo.On("Update", mock.AnythingOfType("*user.User")).Return(nil)
 
@@ -249,7 +143,7 @@ func (suite *AuthServiceIntegrationTestSuite) TestInvalidCredentials() {
 	ctx := context.Background()
 	testTenant := suite.createTestTenant()
 	testUser := suite.createTestUser("test@example.com", "correctpassword", &testTenant.ID)
-	
+
 	suite.tenantRepo.On("GetByCode", "TEST").Return(testTenant, nil)
 	suite.userRepo.On("GetByEmail", &testTenant.ID, "test@example.com").Return(testUser, nil)
 
@@ -301,7 +195,7 @@ func (suite *AuthServiceIntegrationTestSuite) TestUserNotFound() {
 	// Arrange
 	ctx := context.Background()
 	testTenant := suite.createTestTenant()
-	
+
 	suite.tenantRepo.On("GetByCode", "TEST").Return(testTenant, nil)
 	suite.userRepo.On("GetByEmail", &testTenant.ID, "nonexistent@example.com").Return(nil, fmt.Errorf("user not found"))
 
@@ -331,7 +225,7 @@ func (suite *AuthServiceIntegrationTestSuite) TestInactiveUser() {
 	testTenant := suite.createTestTenant()
 	testUser := suite.createTestUser("test@example.com", "password123", &testTenant.ID)
 	testUser.Status = user.StatusInactive // Set user as inactive
-	
+
 	suite.tenantRepo.On("GetByCode", "TEST").Return(testTenant, nil)
 	suite.userRepo.On("GetByEmail", &testTenant.ID, "test@example.com").Return(testUser, nil)
 
@@ -361,7 +255,7 @@ func (suite *AuthServiceIntegrationTestSuite) TestSuspendedTenant() {
 	testTenant := suite.createTestTenant()
 	testTenant.Status = tenant.StatusSuspended // Set tenant as suspended
 	testUser := suite.createTestUser("test@example.com", "password123", &testTenant.ID)
-	
+
 	suite.tenantRepo.On("GetByCode", "TEST").Return(testTenant, nil)
 	suite.userRepo.On("GetByEmail", &testTenant.ID, "test@example.com").Return(testUser, nil)
 
@@ -389,11 +283,11 @@ func (suite *AuthServiceIntegrationTestSuite) TestBcryptPasswordVerification() {
 	// Arrange
 	ctx := context.Background()
 	testTenant := suite.createTestTenant()
-	
+
 	// Create a user with a specific password
 	plainPassword := "MySecurePassword123!"
 	testUser := suite.createTestUser("test@example.com", plainPassword, &testTenant.ID)
-	
+
 	suite.tenantRepo.On("GetByCode", "TEST").Return(testTenant, nil)
 	suite.userRepo.On("GetByEmail", &testTenant.ID, "test@example.com").Return(testUser, nil)
 	suite.userRepo.On("Update", mock.AnythingOfType("*user.User")).Return(nil)
@@ -410,9 +304,9 @@ func (suite *AuthServiceIntegrationTestSuite) TestBcryptPasswordVerification() {
 	// Assert
 	suite.NoError(err)
 	suite.NotNil(response)
-	
+
 	// Verify the password was properly hashed and verified
-	suite.True(testUser.CheckPassword(plainPassword)) // Direct check
+	suite.True(testUser.CheckPassword(plainPassword))    // Direct check
 	suite.False(testUser.CheckPassword("wrongpassword")) // Should fail with wrong password
 
 	// Verify mock expectations
@@ -431,7 +325,7 @@ func (suite *AuthServiceIntegrationTestSuite) TestSuccessfulRegistrationBySystem
 	ctx := context.Background()
 	testTenant := suite.createTestTenant()
 	adminUser := suite.createTestUser("admin@system.com", "adminpass", nil) // System admin
-	
+
 	suite.tenantRepo.On("GetByCode", "TEST").Return(testTenant, nil)
 	suite.userRepo.On("ExistsByEmail", &testTenant.ID, "newuser@example.com").Return(false, nil)
 	suite.userRepo.On("ExistsByUsername", &testTenant.ID, "newuser").Return(false, nil)
@@ -494,7 +388,7 @@ func (suite *AuthServiceIntegrationTestSuite) TestRegistrationEmailAlreadyExists
 	ctx := context.Background()
 	testTenant := suite.createTestTenant()
 	adminUser := suite.createTestUser("admin@system.com", "adminpass", nil)
-	
+
 	suite.tenantRepo.On("GetByCode", "TEST").Return(testTenant, nil)
 	suite.userRepo.On("ExistsByEmail", &testTenant.ID, "existing@example.com").Return(true, nil)
 
@@ -525,7 +419,7 @@ func (suite *AuthServiceIntegrationTestSuite) TestSuccessfulTokenRefresh() {
 	// Arrange
 	ctx := context.Background()
 	testUser := suite.createTestUser("test@example.com", "password123", nil) // System admin
-	
+
 	// Mock JWT manager for testing without config dependency
 	jwtManager := createTestJWTManager()
 	refreshToken, err := jwtManager.GenerateRefreshToken(testUser.ID, testUser.TenantID)
@@ -555,7 +449,7 @@ func (suite *AuthServiceIntegrationTestSuite) TestRefreshWithInactiveUser() {
 	ctx := context.Background()
 	testUser := suite.createTestUser("test@example.com", "password123", nil)
 	testUser.Status = user.StatusInactive // Make user inactive
-	
+
 	// Mock JWT manager for testing without config dependency
 	jwtManager := createTestJWTManager()
 	refreshToken, err := jwtManager.GenerateRefreshToken(testUser.ID, testUser.TenantID)

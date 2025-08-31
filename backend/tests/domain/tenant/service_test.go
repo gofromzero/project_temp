@@ -56,6 +56,11 @@ func (m *MockTenantRepository) Count() (int64, error) {
 	return args.Get(0).(int64), args.Error(1)
 }
 
+func (m *MockTenantRepository) ListWithFilters(filters map[string]interface{}, offset, limit int) ([]*tenant.Tenant, int, error) {
+	args := m.Called(filters, offset, limit)
+	return args.Get(0).([]*tenant.Tenant), args.Get(1).(int), args.Error(2)
+}
+
 func TestService_CreateTenant(t *testing.T) {
 	mockRepo := new(MockTenantRepository)
 	service := tenant.NewService(mockRepo)

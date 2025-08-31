@@ -13,10 +13,10 @@ import (
 func TestMain(m *testing.M) {
 	// Set environment variable for JWT secret
 	os.Setenv("JWT_SECRET", "test-secret-key-for-jwt-testing")
-	
+
 	// Run tests
 	code := m.Run()
-	
+
 	// Cleanup
 	os.Unsetenv("JWT_SECRET")
 	os.Exit(code)
@@ -25,10 +25,10 @@ func TestMain(m *testing.M) {
 // Create a manual JWT manager for testing without GoFrame config dependency
 func createTestJWTManager() *utils.JWTManager {
 	config := &utils.JWTConfig{
-		SecretKey:            "test-secret-key-for-jwt-testing",
-		AccessTokenExpiry:    1 * time.Hour,
-		RefreshTokenExpiry:   7 * 24 * time.Hour,
-		BlacklistKeyPrefix:   "jwt_blacklist:",
+		SecretKey:          "test-secret-key-for-jwt-testing",
+		AccessTokenExpiry:  1 * time.Hour,
+		RefreshTokenExpiry: 7 * 24 * time.Hour,
+		BlacklistKeyPrefix: "jwt_blacklist:",
 	}
 	return &utils.JWTManager{Config: config}
 }

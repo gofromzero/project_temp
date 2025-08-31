@@ -63,14 +63,14 @@ func TestHealthHandler_NewHealthHandler(t *testing.T) {
 func TestComponentStatus_StatusValues(t *testing.T) {
 	// Test valid status values
 	validStatuses := []string{"healthy", "degraded", "unhealthy"}
-	
+
 	for _, status := range validStatuses {
 		component := handlers.ComponentStatus{
 			Status:       status,
 			ResponseTime: 10.0,
 			Message:      "test message",
 		}
-		
+
 		assert.Contains(t, validStatuses, component.Status)
 		assert.Equal(t, 10.0, component.ResponseTime)
 		assert.Equal(t, "test message", component.Message)

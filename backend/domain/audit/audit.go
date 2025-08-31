@@ -14,16 +14,16 @@ type AuditLogDetails struct {
 
 // AuditLog represents the audit log domain entity
 type AuditLog struct {
-	ID         string           `json:"id" gorm:"type:varchar(36);primaryKey"`
-	TenantID   *string          `json:"tenantId,omitempty" gorm:"type:varchar(36);index"`
-	UserID     string           `json:"userId" gorm:"type:varchar(36);not null;index"`
-	Action     string           `json:"action" gorm:"type:varchar(50);not null;index;comment:create,update,delete,login,logout"`
-	Resource   string           `json:"resource" gorm:"type:varchar(50);not null;index;comment:user,tenant,role,permission"`
-	ResourceID *string          `json:"resourceId,omitempty" gorm:"type:varchar(36);index"`
-	Details    AuditLogDetails  `json:"details" gorm:"type:json"`
-	IPAddress  *string          `json:"ipAddress,omitempty" gorm:"type:varchar(45)"`
-	UserAgent  *string          `json:"userAgent,omitempty" gorm:"type:varchar(500)"`
-	Timestamp  time.Time        `json:"timestamp" gorm:"autoCreateTime;index"`
+	ID         string          `json:"id" gorm:"type:varchar(36);primaryKey"`
+	TenantID   *string         `json:"tenantId,omitempty" gorm:"type:varchar(36);index"`
+	UserID     string          `json:"userId" gorm:"type:varchar(36);not null;index"`
+	Action     string          `json:"action" gorm:"type:varchar(50);not null;index;comment:create,update,delete,login,logout"`
+	Resource   string          `json:"resource" gorm:"type:varchar(50);not null;index;comment:user,tenant,role,permission"`
+	ResourceID *string         `json:"resourceId,omitempty" gorm:"type:varchar(36);index"`
+	Details    AuditLogDetails `json:"details" gorm:"type:json"`
+	IPAddress  *string         `json:"ipAddress,omitempty" gorm:"type:varchar(45)"`
+	UserAgent  *string         `json:"userAgent,omitempty" gorm:"type:varchar(500)"`
+	Timestamp  time.Time       `json:"timestamp" gorm:"autoCreateTime;index"`
 }
 
 // TableName returns the table name for GORM

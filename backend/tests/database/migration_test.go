@@ -41,7 +41,7 @@ func TestMigrationScripts(t *testing.T) {
 		// 验证迁移脚本应该包含的关键元素
 		requiredTables := []string{
 			"tenants",
-			"users", 
+			"users",
 			"roles",
 			"permissions",
 			"user_roles",
@@ -60,7 +60,7 @@ func TestMigrationScripts(t *testing.T) {
 		// 验证应该创建的系统角色
 		systemRoles := []string{
 			"system-admin",
-			"tenant-admin", 
+			"tenant-admin",
 			"tenant-user",
 		}
 
@@ -73,7 +73,7 @@ func TestMigrationScripts(t *testing.T) {
 		permissionResources := []string{
 			"tenant",
 			"user",
-			"role", 
+			"role",
 			"permission",
 			"audit",
 		}
@@ -90,7 +90,7 @@ func TestMigrationRollback(t *testing.T) {
 		rollbackOrder := []string{
 			"audit_logs",
 			"role_permissions",
-			"user_roles", 
+			"user_roles",
 			"permissions",
 			"roles",
 			"users",
@@ -107,14 +107,14 @@ func TestDatabaseConstraints(t *testing.T) {
 	t.Run("验证外键约束设计", func(t *testing.T) {
 		// 验证主要的外键约束关系
 		constraints := map[string]string{
-			"users.tenant_id":           "tenants.id",
-			"roles.tenant_id":           "tenants.id", 
-			"user_roles.user_id":        "users.id",
-			"user_roles.role_id":        "roles.id",
-			"role_permissions.role_id":  "roles.id",
+			"users.tenant_id":                "tenants.id",
+			"roles.tenant_id":                "tenants.id",
+			"user_roles.user_id":             "users.id",
+			"user_roles.role_id":             "roles.id",
+			"role_permissions.role_id":       "roles.id",
 			"role_permissions.permission_id": "permissions.id",
-			"audit_logs.tenant_id":      "tenants.id",
-			"audit_logs.user_id":        "users.id",
+			"audit_logs.tenant_id":           "tenants.id",
+			"audit_logs.user_id":             "users.id",
 		}
 
 		for foreignKey, primaryKey := range constraints {
@@ -130,7 +130,7 @@ func TestDatabaseConstraints(t *testing.T) {
 		// 验证重要的唯一约束
 		uniqueConstraints := []string{
 			"tenants.code",
-			"tenants.name", 
+			"tenants.name",
 			"permissions.code",
 			"users.tenant_id+username",
 			"users.tenant_id+email",

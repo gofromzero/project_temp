@@ -48,7 +48,7 @@ func TestTenantFilter(t *testing.T) {
 		}
 
 		for _, table := range systemOnlyTables {
-			assert.NotEmpty(t, table) // 在实际实现中会调用 filter.isSystemOnlyTable(table) 
+			assert.NotEmpty(t, table) // 在实际实现中会调用 filter.isSystemOnlyTable(table)
 		}
 
 		for _, table := range junctionTables {
@@ -82,7 +82,7 @@ func TestTenantFilter(t *testing.T) {
 	t.Run("插入数据租户过滤", func(t *testing.T) {
 		tenantID := "tenant-123"
 		ctx1 := filter.WithTenantContext(ctx, &tenantID, false)
-		
+
 		// 测试插入数据时自动设置租户ID
 		userData := map[string]interface{}{
 			"id":       "user-123",
@@ -109,19 +109,19 @@ func TestTenantFilter(t *testing.T) {
 
 func TestDatabaseConnection(t *testing.T) {
 	t.Skip("Skipping database connection tests as they require GoFrame configuration")
-	
+
 	// These tests would verify database connection functionality
 	// but require proper GoFrame configuration to run
-	
+
 	ctx := context.Background()
 	tenantID := "tenant-123"
-	
+
 	// Test context creation (doesn't require DB connection)
 	filter := middleware.NewTenantFilter()
 	tenantCtx := filter.WithTenantContext(ctx, &tenantID, false)
-	
+
 	assert.NotNil(t, tenantCtx)
-	
+
 	retrievedTenantID, ok := filter.GetTenantID(tenantCtx)
 	assert.True(t, ok)
 	assert.Equal(t, tenantID, *retrievedTenantID)
@@ -135,7 +135,7 @@ func TestTenantDataIsolationScenarios(t *testing.T) {
 		// 创建两个租户的上下文
 		tenant1ID := "tenant-abc"
 		tenant2ID := "tenant-xyz"
-		
+
 		ctx1 := filter.WithTenantContext(ctx, &tenant1ID, false)
 		ctx2 := filter.WithTenantContext(ctx, &tenant2ID, false)
 
@@ -148,7 +148,7 @@ func TestTenantDataIsolationScenarios(t *testing.T) {
 
 		// 模拟租户2的用户数据
 		user2Data := map[string]interface{}{
-			"id":       "user-in-tenant2", 
+			"id":       "user-in-tenant2",
 			"username": "john", // 同样的用户名，但在不同租户
 			"email":    "john@tenant2.com",
 		}
@@ -173,7 +173,7 @@ func TestTenantDataIsolationScenarios(t *testing.T) {
 
 		tenant1ID := "tenant-abc"
 		tenant2ID := "tenant-xyz"
-		
+
 		ctx1 := filter.WithTenantContext(ctx, &tenant1ID, false)
 		ctx2 := filter.WithTenantContext(ctx, &tenant2ID, false)
 
@@ -186,7 +186,7 @@ func TestTenantDataIsolationScenarios(t *testing.T) {
 
 		role2Data := map[string]interface{}{
 			"id":   "role-admin-tenant2",
-			"name": "Administrator", 
+			"name": "Administrator",
 			"code": "admin",
 		}
 
@@ -209,7 +209,7 @@ func TestTenantDataIsolationScenarios(t *testing.T) {
 
 		auditData := map[string]interface{}{
 			"id":       "audit-123",
-			"user_id":  "user-456", 
+			"user_id":  "user-456",
 			"action":   "create",
 			"resource": "user",
 		}

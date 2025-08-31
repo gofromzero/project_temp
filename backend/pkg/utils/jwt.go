@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 var (
@@ -22,17 +22,17 @@ type TokenPayload struct {
 	Username  string   `json:"username"`
 	Email     string   `json:"email"`
 	Roles     []string `json:"roles"`
-	IsAdmin   bool     `json:"is_admin"`    // system admin flag
+	IsAdmin   bool     `json:"is_admin"`   // system admin flag
 	TokenType string   `json:"token_type"` // access or refresh
 	jwt.RegisteredClaims
 }
 
 // JWTConfig holds JWT configuration
 type JWTConfig struct {
-	SecretKey            string
-	AccessTokenExpiry    time.Duration
-	RefreshTokenExpiry   time.Duration
-	BlacklistKeyPrefix   string
+	SecretKey          string
+	AccessTokenExpiry  time.Duration
+	RefreshTokenExpiry time.Duration
+	BlacklistKeyPrefix string
 }
 
 // JWTManager handles JWT operations
@@ -48,10 +48,10 @@ func NewJWTManager() (*JWTManager, error) {
 	}
 
 	config := &JWTConfig{
-		SecretKey:            secretKey,
-		AccessTokenExpiry:    1 * time.Hour,      // 1 hour for access tokens
-		RefreshTokenExpiry:   7 * 24 * time.Hour, // 7 days for refresh tokens
-		BlacklistKeyPrefix:   "jwt_blacklist:",
+		SecretKey:          secretKey,
+		AccessTokenExpiry:  1 * time.Hour,      // 1 hour for access tokens
+		RefreshTokenExpiry: 7 * 24 * time.Hour, // 7 days for refresh tokens
+		BlacklistKeyPrefix: "jwt_blacklist:",
 	}
 
 	return &JWTManager{Config: config}, nil

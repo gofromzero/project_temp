@@ -11,10 +11,10 @@ import (
 // and is properly defined in the domain layer
 func TestTenantRepositoryInterface(t *testing.T) {
 	// This test verifies the interface definition without requiring database connection
-	
+
 	// Define a mock implementation to test interface compliance
 	var mockRepo tenant.TenantRepository
-	
+
 	// Test interface methods exist (this will compile only if interface is properly defined)
 	if mockRepo != nil {
 		// These calls would fail at runtime but they compile, proving interface is correct
@@ -26,7 +26,7 @@ func TestTenantRepositoryInterface(t *testing.T) {
 		_ = mockRepo.Update(nil)
 		_ = mockRepo.Delete("test")
 	}
-	
+
 	// If we get here, the interface is properly defined
 	assert.True(t, true, "TenantRepository interface is properly defined")
 }
@@ -37,6 +37,6 @@ func TestRepositoryInterfaceConsistency(t *testing.T) {
 	// This is validated by the fact that our service uses it
 	service := tenant.NewService(nil) // Can pass nil since we're not calling methods
 	assert.NotNil(t, service, "Service should accept TenantRepository interface")
-	
+
 	// The existence of the service proves the domain interface is properly defined
 }

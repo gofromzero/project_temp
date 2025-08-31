@@ -74,7 +74,7 @@ func TestTenantEntity(t *testing.T) {
 
 	t.Run("设置租户配置", func(t *testing.T) {
 		tn := &tenant.Tenant{ID: "tenant-789"}
-		
+
 		newConfig := tenant.TenantConfig{
 			MaxUsers: 200,
 			Features: []string{"premium"},

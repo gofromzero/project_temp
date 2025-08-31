@@ -45,14 +45,14 @@ func (r *UserRepository) GetByID(id string) (*user.User, error) {
 // GetByUsername retrieves a user by username within a tenant
 func (r *UserRepository) GetByUsername(tenantID *string, username string) (*user.User, error) {
 	ctx := context.Background()
-	
+
 	// Create tenant-aware context
 	if tenantID != nil {
 		ctx = r.connection.WithTenantContext(ctx, tenantID, false)
 	} else {
 		ctx = r.connection.WithTenantContext(ctx, nil, true) // System admin
 	}
-	
+
 	model, err := r.connection.GetTenantAwareModel(ctx, "users")
 	if err != nil {
 		return nil, err
@@ -76,14 +76,14 @@ func (r *UserRepository) GetByUsername(tenantID *string, username string) (*user
 // GetByEmail retrieves a user by email within a tenant
 func (r *UserRepository) GetByEmail(tenantID *string, email string) (*user.User, error) {
 	ctx := context.Background()
-	
+
 	// Create tenant-aware context
 	if tenantID != nil {
 		ctx = r.connection.WithTenantContext(ctx, tenantID, false)
 	} else {
 		ctx = r.connection.WithTenantContext(ctx, nil, true) // System admin
 	}
-	
+
 	model, err := r.connection.GetTenantAwareModel(ctx, "users")
 	if err != nil {
 		return nil, err
@@ -108,7 +108,7 @@ func (r *UserRepository) GetByEmail(tenantID *string, email string) (*user.User,
 func (r *UserRepository) GetByTenantID(tenantID string, offset, limit int) ([]*user.User, error) {
 	ctx := context.Background()
 	ctx = r.connection.WithTenantContext(ctx, &tenantID, false)
-	
+
 	model, err := r.connection.GetTenantAwareModel(ctx, "users")
 	if err != nil {
 		return nil, err
@@ -129,7 +129,7 @@ func (r *UserRepository) GetByTenantID(tenantID string, offset, limit int) ([]*u
 func (r *UserRepository) GetSystemAdmins(offset, limit int) ([]*user.User, error) {
 	ctx := context.Background()
 	ctx = r.connection.WithTenantContext(ctx, nil, true)
-	
+
 	model, err := r.connection.GetTenantAwareModel(ctx, "users")
 	if err != nil {
 		return nil, err
@@ -149,14 +149,14 @@ func (r *UserRepository) GetSystemAdmins(offset, limit int) ([]*user.User, error
 // Update updates a user
 func (r *UserRepository) Update(user *user.User) error {
 	ctx := context.Background()
-	
+
 	// Create tenant-aware context based on user's tenant
 	if user.TenantID != nil {
 		ctx = r.connection.WithTenantContext(ctx, user.TenantID, false)
 	} else {
 		ctx = r.connection.WithTenantContext(ctx, nil, true)
 	}
-	
+
 	model, err := r.connection.GetTenantAwareModel(ctx, "users")
 	if err != nil {
 		return err
@@ -181,13 +181,13 @@ func (r *UserRepository) Delete(id string) error {
 // Count returns the count of users for a tenant
 func (r *UserRepository) Count(tenantID *string) (int64, error) {
 	ctx := context.Background()
-	
+
 	if tenantID != nil {
 		ctx = r.connection.WithTenantContext(ctx, tenantID, false)
 	} else {
 		ctx = r.connection.WithTenantContext(ctx, nil, true)
 	}
-	
+
 	model, err := r.connection.GetTenantAwareModel(ctx, "users")
 	if err != nil {
 		return 0, err
@@ -207,13 +207,13 @@ func (r *UserRepository) Count(tenantID *string) (int64, error) {
 // ExistsByUsername checks if a user exists by username within a tenant
 func (r *UserRepository) ExistsByUsername(tenantID *string, username string) (bool, error) {
 	ctx := context.Background()
-	
+
 	if tenantID != nil {
 		ctx = r.connection.WithTenantContext(ctx, tenantID, false)
 	} else {
 		ctx = r.connection.WithTenantContext(ctx, nil, true)
 	}
-	
+
 	model, err := r.connection.GetTenantAwareModel(ctx, "users")
 	if err != nil {
 		return false, err
@@ -233,13 +233,13 @@ func (r *UserRepository) ExistsByUsername(tenantID *string, username string) (bo
 // ExistsByEmail checks if a user exists by email within a tenant
 func (r *UserRepository) ExistsByEmail(tenantID *string, email string) (bool, error) {
 	ctx := context.Background()
-	
+
 	if tenantID != nil {
 		ctx = r.connection.WithTenantContext(ctx, tenantID, false)
 	} else {
 		ctx = r.connection.WithTenantContext(ctx, nil, true)
 	}
-	
+
 	model, err := r.connection.GetTenantAwareModel(ctx, "users")
 	if err != nil {
 		return false, err

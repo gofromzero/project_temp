@@ -63,7 +63,7 @@ type APIResponse struct {
 // Login handles POST /auth/login
 func (h *AuthHandler) Login(r *ghttp.Request) {
 	ctx := r.Context()
-	
+
 	// Parse request body
 	var req LoginRequest
 	if err := r.Parse(&req); err != nil {
@@ -352,7 +352,7 @@ func (h *AuthHandler) Register(r *ghttp.Request) {
 func (h *AuthHandler) Profile(r *ghttp.Request) {
 	// This endpoint requires authentication middleware
 	// The middleware should set user info in context
-	
+
 	// For now, return a simple response
 	r.Response.WriteJson(APIResponse{
 		Success: true,

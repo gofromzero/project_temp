@@ -7,7 +7,7 @@ import (
 func TestHealthFunctions(t *testing.T) {
 	// Note: These tests are designed to work without external dependencies
 	// for scaffolding validation purposes
-	
+
 	t.Run("TestDatabaseConnection should handle errors gracefully", func(t *testing.T) {
 		// Test should not panic and should handle missing config/database gracefully
 		defer func() {
@@ -41,7 +41,7 @@ func TestHealthFunctions(t *testing.T) {
 			t.Logf("Redis connection test passed")
 		}
 	})
-	
+
 	t.Run("Health functions should be available for integration", func(t *testing.T) {
 		// Verify functions exist and are callable - this always passes
 		// Functions are available if we can reference them without panic

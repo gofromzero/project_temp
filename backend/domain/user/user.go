@@ -25,19 +25,19 @@ type UserProfile struct {
 
 // User represents the user domain entity
 type User struct {
-	ID             string       `json:"id" gorm:"type:varchar(36);primaryKey"`
-	TenantID       *string      `json:"tenantId,omitempty" gorm:"type:varchar(36);index;comment:null for system administrators"`
-	Username       string       `json:"username" gorm:"type:varchar(100);not null"`
-	Email          string       `json:"email" gorm:"type:varchar(255);not null"`
-	HashedPassword string       `json:"-" gorm:"type:varchar(255);not null"`
-	FirstName      string       `json:"firstName" gorm:"type:varchar(100);not null"`
-	LastName       string       `json:"lastName" gorm:"type:varchar(100);not null"`
-	Avatar         *string      `json:"avatar,omitempty" gorm:"type:varchar(500)"`
-	Phone          *string      `json:"phone,omitempty" gorm:"type:varchar(20)"`
-	Status         UserStatus   `json:"status" gorm:"type:enum('active','inactive','locked');default:'active'"`
-	LastLoginAt    *time.Time   `json:"lastLoginAt,omitempty" gorm:"index"`
-	CreatedAt      time.Time    `json:"createdAt" gorm:"autoCreateTime"`
-	UpdatedAt      time.Time    `json:"updatedAt" gorm:"autoUpdateTime"`
+	ID             string     `json:"id" gorm:"type:varchar(36);primaryKey"`
+	TenantID       *string    `json:"tenantId,omitempty" gorm:"type:varchar(36);index;comment:null for system administrators"`
+	Username       string     `json:"username" gorm:"type:varchar(100);not null"`
+	Email          string     `json:"email" gorm:"type:varchar(255);not null"`
+	HashedPassword string     `json:"-" gorm:"type:varchar(255);not null"`
+	FirstName      string     `json:"firstName" gorm:"type:varchar(100);not null"`
+	LastName       string     `json:"lastName" gorm:"type:varchar(100);not null"`
+	Avatar         *string    `json:"avatar,omitempty" gorm:"type:varchar(500)"`
+	Phone          *string    `json:"phone,omitempty" gorm:"type:varchar(20)"`
+	Status         UserStatus `json:"status" gorm:"type:enum('active','inactive','locked');default:'active'"`
+	LastLoginAt    *time.Time `json:"lastLoginAt,omitempty" gorm:"index"`
+	CreatedAt      time.Time  `json:"createdAt" gorm:"autoCreateTime"`
+	UpdatedAt      time.Time  `json:"updatedAt" gorm:"autoUpdateTime"`
 }
 
 // TableName returns the table name for GORM

@@ -36,7 +36,7 @@ func AuthRoutes(s *ghttp.Server) error {
 		"/health",
 		"/ping",
 	}
-	
+
 	authMiddleware, err := middleware.NewAuthMiddleware(authService, publicPaths)
 	if err != nil {
 		return err
@@ -46,7 +46,7 @@ func AuthRoutes(s *ghttp.Server) error {
 	s.Group("/auth", func(group *ghttp.RouterGroup) {
 		group.POST("/login", authHandler.Login)
 		// Note: Register requires admin authentication but is handled within the handler
-		group.POST("/register", authHandler.Register) 
+		group.POST("/register", authHandler.Register)
 		group.POST("/refresh", authHandler.RefreshToken)
 		group.POST("/logout", authHandler.Logout)
 	})
@@ -79,7 +79,7 @@ func AuthRoutes(s *ghttp.Server) error {
 	// Example of role-based protected routes
 	s.Group("/api", func(group *ghttp.RouterGroup) {
 		group.Middleware(authMiddleware.Authenticate)
-		
+
 		// User management endpoints that require admin role
 		group.Group("/users", func(userGroup *ghttp.RouterGroup) {
 			userGroup.Middleware(authMiddleware.RequireRole("admin"))

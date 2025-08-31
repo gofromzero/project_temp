@@ -37,14 +37,14 @@ type TenantConfig struct {
 
 // Tenant represents the tenant domain entity
 type Tenant struct {
-	ID          string        `json:"id" gorm:"type:varchar(36);primaryKey"`
-	Name        string        `json:"name" gorm:"type:varchar(255);not null;uniqueIndex"`
-	Code        string        `json:"code" gorm:"type:varchar(100);not null;uniqueIndex"`
-	Status      TenantStatus  `json:"status" gorm:"type:enum('active','suspended','disabled');default:'active'"`
-	Config      TenantConfig  `json:"config" gorm:"type:json"`
-	AdminUserID *string       `json:"adminUserId,omitempty" gorm:"type:varchar(36);index"`
-	CreatedAt   time.Time     `json:"createdAt" gorm:"autoCreateTime"`
-	UpdatedAt   time.Time     `json:"updatedAt" gorm:"autoUpdateTime"`
+	ID          string       `json:"id" gorm:"type:varchar(36);primaryKey"`
+	Name        string       `json:"name" gorm:"type:varchar(255);not null;uniqueIndex"`
+	Code        string       `json:"code" gorm:"type:varchar(100);not null;uniqueIndex"`
+	Status      TenantStatus `json:"status" gorm:"type:enum('active','suspended','disabled');default:'active'"`
+	Config      TenantConfig `json:"config" gorm:"type:json"`
+	AdminUserID *string      `json:"adminUserId,omitempty" gorm:"type:varchar(36);index"`
+	CreatedAt   time.Time    `json:"createdAt" gorm:"autoCreateTime"`
+	UpdatedAt   time.Time    `json:"updatedAt" gorm:"autoUpdateTime"`
 }
 
 // TableName returns the table name for GORM
@@ -148,5 +148,6 @@ type TenantRepository interface {
 	Update(tenant *Tenant) error
 	Delete(id string) error
 	List(offset, limit int) ([]*Tenant, error)
+	ListWithFilters(filters map[string]interface{}, offset, limit int) ([]*Tenant, int, error)
 	Count() (int64, error)
 }

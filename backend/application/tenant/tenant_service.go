@@ -1,8 +1,10 @@
 package tenant
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/gofromzero/project_temp/backend/domain/tenant"
 	"github.com/gofromzero/project_temp/backend/infr/repository/mysql"
@@ -19,10 +21,10 @@ type TenantService struct {
 func NewTenantService() *TenantService {
 	// Initialize repository
 	repo := mysql.NewTenantRepository()
-	
+
 	// Initialize domain service with repository
 	domainService := tenant.NewService(repo)
-	
+
 	return &TenantService{
 		tenantDomainService: domainService,
 		tenantRepository:    repo,
@@ -31,10 +33,10 @@ func NewTenantService() *TenantService {
 
 // CreateTenantRequest represents the request to create a new tenant
 type CreateTenantRequest struct {
-	Name      string                `json:"name" validate:"required,min=1,max=255"`
-	Code      string                `json:"code" validate:"required,min=2,max=100,alphanum"`
-	Config    *tenant.TenantConfig  `json:"config,omitempty"`
-	AdminUser *AdminUserData        `json:"adminUser,omitempty"`
+	Name      string               `json:"name" validate:"required,min=1,max=255"`
+	Code      string               `json:"code" validate:"required,min=2,max=100,alphanum"`
+	Config    *tenant.TenantConfig `json:"config,omitempty"`
+	AdminUser *AdminUserData       `json:"adminUser,omitempty"`
 }
 
 // AdminUserData represents admin user information for tenant creation
@@ -65,13 +67,13 @@ func (s *TenantService) CreateTenant(req CreateTenantRequest) (*CreateTenantResp
 	if err := s.validateCreateTenantRequest(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Create tenant through domain service
 	newTenant, err := s.tenantDomainService.CreateTenant(req.Name, req.Code, req.Config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create tenant: %w", err)
 	}
-	
+
 	// Initialize tenant data structures
 	if err := s.initializeTenantData(newTenant); err != nil {
 		// If data initialization fails, we might want to rollback tenant creation
@@ -79,12 +81,12 @@ func (s *TenantService) CreateTenant(req CreateTenantRequest) (*CreateTenantResp
 		// In a real implementation, this should use transactions
 		return nil, fmt.Errorf("failed to initialize tenant data: %w", err)
 	}
-	
+
 	response := &CreateTenantResponse{
 		Tenant:  newTenant,
 		Message: fmt.Sprintf("Tenant '%s' created successfully", newTenant.Name),
 	}
-	
+
 	// Create admin user if provided
 	if req.AdminUser != nil {
 		adminUser, err := s.createAdminUser(newTenant.ID, *req.AdminUser)
@@ -96,7 +98,7 @@ func (s *TenantService) CreateTenant(req CreateTenantRequest) (*CreateTenantResp
 			response.Message = fmt.Sprintf("Tenant '%s' and admin user created successfully", newTenant.Name)
 		}
 	}
-	
+
 	return response, nil
 }
 
@@ -113,20 +115,20 @@ func (s *TenantService) UpdateTenant(id string, req UpdateTenantRequest) (*tenan
 	if err := s.validateUpdateTenantRequest(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Convert to domain update structure
 	updates := tenant.TenantUpdates{
 		Name:   req.Name,
 		Status: req.Status,
 		Config: req.Config,
 	}
-	
+
 	// Update through domain service
 	updatedTenant, err := s.tenantDomainService.UpdateTenant(id, updates)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update tenant: %w", err)
 	}
-	
+
 	return updatedTenant, nil
 }
 
@@ -135,7 +137,7 @@ func (s *TenantService) GetTenant(id string) (*tenant.Tenant, error) {
 	if id == "" {
 		return nil, errors.New("tenant ID is required")
 	}
-	
+
 	return s.tenantDomainService.GetTenant(id)
 }
 
@@ -144,7 +146,7 @@ func (s *TenantService) GetTenantByCode(code string) (*tenant.Tenant, error) {
 	if code == "" {
 		return nil, errors.New("tenant code is required")
 	}
-	
+
 	return s.tenantDomainService.GetTenantByCode(code)
 }
 
@@ -153,7 +155,7 @@ func (s *TenantService) ActivateTenant(id string) (*tenant.Tenant, error) {
 	if id == "" {
 		return nil, errors.New("tenant ID is required")
 	}
-	
+
 	return s.tenantDomainService.ActivateTenant(id)
 }
 
@@ -162,7 +164,7 @@ func (s *TenantService) SuspendTenant(id string) (*tenant.Tenant, error) {
 	if id == "" {
 		return nil, errors.New("tenant ID is required")
 	}
-	
+
 	return s.tenantDomainService.SuspendTenant(id)
 }
 
@@ -171,8 +173,144 @@ func (s *TenantService) DisableTenant(id string) (*tenant.Tenant, error) {
 	if id == "" {
 		return nil, errors.New("tenant ID is required")
 	}
-	
+
 	return s.tenantDomainService.DisableTenant(id)
+}
+
+// ListTenantsRequest represents the request parameters for listing tenants
+type ListTenantsRequest struct {
+	Page   int    `json:"page,omitempty" validate:"omitempty,min=1"`
+	Limit  int    `json:"limit,omitempty" validate:"omitempty,min=1,max=100"`
+	Name   string `json:"name,omitempty"`
+	Code   string `json:"code,omitempty"`
+	Status string `json:"status,omitempty" validate:"omitempty,oneof=active suspended disabled"`
+}
+
+// Pagination represents pagination information
+type Pagination struct {
+	Page  int `json:"page"`
+	Limit int `json:"limit"`
+	Total int `json:"total"`
+	Pages int `json:"pages"`
+}
+
+// ListTenantsResponse represents the response for listing tenants
+type ListTenantsResponse struct {
+	Tenants    []*tenant.Tenant `json:"tenants"`
+	Pagination Pagination       `json:"pagination"`
+}
+
+// ListTenants retrieves a paginated list of tenants with optional filtering
+func (s *TenantService) ListTenants(req ListTenantsRequest) (*ListTenantsResponse, error) {
+	// Set default values
+	if req.Page <= 0 {
+		req.Page = 1
+	}
+	if req.Limit <= 0 {
+		req.Limit = 10
+	}
+
+	// Validate request
+	if err := s.validateListTenantsRequest(req); err != nil {
+		return nil, fmt.Errorf("invalid request: %w", err)
+	}
+
+	// Build filter criteria
+	filters := make(map[string]interface{})
+	if req.Name != "" {
+		filters["name"] = req.Name
+	}
+	if req.Code != "" {
+		filters["code"] = req.Code
+	}
+	if req.Status != "" {
+		filters["status"] = req.Status
+	}
+
+	// Calculate offset
+	offset := (req.Page - 1) * req.Limit
+
+	// Get tenants from domain service
+	tenants, total, err := s.tenantDomainService.ListTenants(filters, req.Limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list tenants: %w", err)
+	}
+
+	// Calculate total pages
+	pages := (total + req.Limit - 1) / req.Limit
+
+	return &ListTenantsResponse{
+		Tenants: tenants,
+		Pagination: Pagination{
+			Page:  req.Page,
+			Limit: req.Limit,
+			Total: total,
+			Pages: pages,
+		},
+	}, nil
+}
+
+// DeleteTenant deletes a tenant and all associated data
+func (s *TenantService) DeleteTenant(id, confirmation, reason string, createBackup bool) (*CleanupResult, error) {
+	if id == "" {
+		return nil, errors.New("tenant ID is required")
+	}
+
+	// Verify tenant exists before deletion
+	tenant, err := s.tenantDomainService.GetTenant(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create cleanup service
+	cleanupService := NewTenantCleanupService()
+
+	// Determine cleanup reason
+	cleanupReason := CleanupReasonTenantDeletion
+	if reason != "" {
+		switch reason {
+		case "gdpr":
+			cleanupReason = CleanupReasonGDPRRequest
+		case "compliance":
+			cleanupReason = CleanupReasonCompliance
+		case "user_request":
+			cleanupReason = CleanupReasonUserRequest
+		}
+	}
+
+	// Create cleanup request
+	cleanupRequest := CleanupRequest{
+		TenantID:     id,
+		Reason:       cleanupReason,
+		ErasureType:  DataErasureTypeHard,
+		CreateBackup: createBackup,
+		Confirmation: confirmation,
+		RequestedBy:  "api_user", // TODO: Get actual user from context
+		RequestedAt:  time.Now(),
+		AdditionalInfo: map[string]interface{}{
+			"tenant_name":   tenant.Name,
+			"tenant_code":   tenant.Code,
+			"api_initiated": true,
+		},
+	}
+
+	// Execute tenant deletion with data cleanup
+	ctx := context.Background()
+	result, err := cleanupService.DeleteTenantData(ctx, cleanupRequest)
+	if err != nil {
+		return nil, fmt.Errorf("cleanup operation failed: %w", err)
+	}
+
+	// Remove tenant from main tenants table if cleanup was successful
+	if result.Status == "success" {
+		if err := s.tenantRepository.Delete(id); err != nil {
+			// Log error but don't fail since data cleanup was successful
+			result.Errors = append(result.Errors, fmt.Sprintf("Failed to remove tenant record: %v", err))
+			result.Status = "partial"
+		}
+	}
+
+	return result, nil
 }
 
 // validateCreateTenantRequest validates the create tenant request
@@ -189,7 +327,7 @@ func (s *TenantService) validateCreateTenantRequest(req CreateTenantRequest) err
 	if len(req.Code) > 100 {
 		return errors.New("tenant code must be less than 100 characters")
 	}
-	
+
 	// Validate admin user data if provided
 	if req.AdminUser != nil {
 		if req.AdminUser.Email == "" {
@@ -205,7 +343,7 @@ func (s *TenantService) validateCreateTenantRequest(req CreateTenantRequest) err
 			return errors.New("admin user password must be at least 8 characters")
 		}
 	}
-	
+
 	return nil
 }
 
@@ -219,19 +357,19 @@ func (s *TenantService) validateUpdateTenantRequest(req UpdateTenantRequest) err
 			return errors.New("tenant name must be less than 255 characters")
 		}
 	}
-	
+
 	if req.Status != nil {
 		if !req.Status.IsValid() {
 			return errors.New("invalid tenant status")
 		}
 	}
-	
+
 	if req.Config != nil {
 		if req.Config.MaxUsers <= 0 {
 			return errors.New("max users must be greater than 0")
 		}
 	}
-	
+
 	return nil
 }
 
@@ -242,12 +380,36 @@ func (s *TenantService) initializeTenantData(tenant *tenant.Tenant) error {
 	// 2. Set up default permissions
 	// 3. Initialize tenant-specific settings
 	// 4. Set up any required data structures
-	
+
 	// For now, we'll just return nil as the actual implementation
 	// would depend on other services (user service, role service, etc.)
 	// that are not yet implemented
-	
+
 	// TODO: Implement data initialization when other services are available
+	return nil
+}
+
+// validateListTenantsRequest validates the list tenants request
+func (s *TenantService) validateListTenantsRequest(req ListTenantsRequest) error {
+	if req.Page < 1 {
+		return errors.New("page must be greater than 0")
+	}
+	if req.Limit < 1 || req.Limit > 100 {
+		return errors.New("limit must be between 1 and 100")
+	}
+	if req.Status != "" {
+		validStatuses := []string{"active", "suspended", "disabled"}
+		isValid := false
+		for _, status := range validStatuses {
+			if req.Status == status {
+				isValid = true
+				break
+			}
+		}
+		if !isValid {
+			return errors.New("status must be one of: active, suspended, disabled")
+		}
+	}
 	return nil
 }
 
@@ -258,10 +420,10 @@ func (s *TenantService) createAdminUser(tenantID string, adminData AdminUserData
 	// 2. Assign admin role to the user
 	// 3. Set up user permissions
 	// 4. Send welcome email
-	
+
 	// For now, we'll return a mock user info since the user service
 	// is not yet implemented
-	
+
 	// TODO: Implement admin user creation when user service is available
 	return &UserInfo{
 		ID:       "admin-user-id", // This would be generated by user service

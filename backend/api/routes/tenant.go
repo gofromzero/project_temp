@@ -31,7 +31,7 @@ func TenantRoutes(s *ghttp.Server) error {
 		"/health",
 		"/ping",
 	}
-	
+
 	authMiddleware, err := middleware.NewAuthMiddleware(authService, publicPaths)
 	if err != nil {
 		return err
@@ -41,23 +41,23 @@ func TenantRoutes(s *ghttp.Server) error {
 	s.Group("/tenants", func(group *ghttp.RouterGroup) {
 		// All tenant operations require system admin privileges
 		group.Middleware(authMiddleware.Authenticate, authMiddleware.RequireSystemAdmin)
-		
+
 		// CRUD operations
-		group.POST("/", tenantHandler.CreateTenant)           // POST /tenants
-		group.GET("/:id", tenantHandler.GetTenant)            // GET /tenants/{id}
-		group.PUT("/:id", tenantHandler.UpdateTenant)         // PUT /tenants/{id}
-		
+		group.POST("/", tenantHandler.CreateTenant)   // POST /tenants
+		group.GET("/:id", tenantHandler.GetTenant)    // GET /tenants/{id}
+		group.PUT("/:id", tenantHandler.UpdateTenant) // PUT /tenants/{id}
+
 		// Status management operations
-		group.PUT("/:id/activate", tenantHandler.ActivateTenant)  // PUT /tenants/{id}/activate
-		group.PUT("/:id/suspend", tenantHandler.SuspendTenant)    // PUT /tenants/{id}/suspend
-		group.PUT("/:id/disable", tenantHandler.DisableTenant)    // PUT /tenants/{id}/disable
+		group.PUT("/:id/activate", tenantHandler.ActivateTenant) // PUT /tenants/{id}/activate
+		group.PUT("/:id/suspend", tenantHandler.SuspendTenant)   // PUT /tenants/{id}/suspend
+		group.PUT("/:id/disable", tenantHandler.DisableTenant)   // PUT /tenants/{id}/disable
 	})
 
 	// Tenant self-service routes - Tenant admin only
 	s.Group("/tenant", func(group *ghttp.RouterGroup) {
 		// These routes allow tenant admins to manage their own tenant
 		group.Middleware(authMiddleware.Authenticate, authMiddleware.RequireRole("admin"))
-		
+
 		// Get current tenant info
 		group.GET("/", func(r *ghttp.Request) {
 			// Extract tenant ID from context (set by auth middleware)
@@ -75,7 +75,7 @@ func TenantRoutes(s *ghttp.Server) error {
 			r.SetParam("id", tenantID.(string))
 			tenantHandler.GetTenant(r)
 		})
-		
+
 		// Update current tenant (limited fields)
 		group.PUT("/", func(r *ghttp.Request) {
 			// Extract tenant ID from context

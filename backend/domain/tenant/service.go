@@ -27,7 +27,7 @@ func (s *Service) CreateTenant(name, code string, config *TenantConfig) (*Tenant
 
 	// Create new tenant
 	tenant := NewTenant(name, code)
-	
+
 	// Set custom config if provided
 	if config != nil {
 		if err := tenant.SetConfig(*config); err != nil {
@@ -135,7 +135,7 @@ func (s *Service) ValidateConfig(config TenantConfig) error {
 	if config.MaxUsers <= 0 {
 		return errors.New("max users must be greater than 0")
 	}
-	
+
 	// Validate domain format if provided
 	if config.Domain != nil && *config.Domain != "" {
 		// Basic domain validation (can be enhanced)
@@ -144,7 +144,7 @@ func (s *Service) ValidateConfig(config TenantConfig) error {
 			return errors.New("domain must be between 3 and 253 characters")
 		}
 	}
-	
+
 	return nil
 }
 
@@ -154,8 +154,27 @@ func (s *Service) CanTenantCreateUsers(tenantID string, currentUserCount int) (b
 	if err != nil {
 		return false, fmt.Errorf("tenant not found: %w", err)
 	}
-	
+
 	return tenant.CanCreateUsers(currentUserCount), nil
+}
+
+// ListTenants retrieves a paginated list of tenants with optional filtering
+func (s *Service) ListTenants(filters map[string]interface{}, limit, offset int) ([]*Tenant, int, error) {
+	// Validate parameters
+	if limit <= 0 {
+		limit = 10
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	// Get tenants from repository with filters
+	tenants, total, err := s.repo.ListWithFilters(filters, offset, limit)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to list tenants: %w", err)
+	}
+
+	return tenants, total, nil
 }
 
 // TenantUpdates represents fields that can be updated for a tenant

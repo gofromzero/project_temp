@@ -15,7 +15,7 @@ import (
 
 // AuthMiddleware provides JWT authentication middleware
 type AuthMiddleware struct {
-	jwtManager *utils.JWTManager
+	jwtManager  *utils.JWTManager
 	authService *auth.AuthService
 	publicPaths []string
 }
