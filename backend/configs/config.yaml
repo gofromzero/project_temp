@@ -5,6 +5,12 @@ server:
 logger:
   level: "all"
   stdout: true
+  file: "logs/app.log"
+  format: "json"
+  rotateSize: "100MB"
+  rotateAge: "30d" 
+  rotateCount: 30
+  rotatePack: true
 
 database:
   default:

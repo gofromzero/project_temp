@@ -1,0 +1,50 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Multi-Tenant Admin Backend Application
+  - job_name: 'multi-tenant-backend'
+    static_configs:
+      - targets: ['backend:8000']
+    scrape_interval: 15s
+    metrics_path: '/metrics'
+    scheme: http
+
+  # Prometheus Self Monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node Exporter for System Metrics (optional)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 5s
+
+  # MySQL Database Monitoring (if MySQL exporter is added)
+  # - job_name: 'mysql-exporter'
+  #   static_configs:
+  #     - targets: ['mysql-exporter:9104']
+  #   scrape_interval: 30s
+
+  # Redis Monitoring (if Redis exporter is added)
+  # - job_name: 'redis-exporter'
+  #   static_configs:
+  #     - targets: ['redis-exporter:9121']
+  #   scrape_interval: 30s
+
+# Alertmanager configuration (optional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - alertmanager:9093
+
+# Sample alerting rules (optional)
+# rule_files:
+#   - "alert_rules.yml"
