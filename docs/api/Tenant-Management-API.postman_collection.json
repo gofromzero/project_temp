@@ -1,0 +1,427 @@
+{
+  "info": {
+    "name": "Tenant Management API",
+    "description": "Complete collection for testing the Tenant Management API endpoints",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.example.com/v1",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "your-jwt-token-here",
+      "type": "string"
+    },
+    {
+      "key": "tenant_id",
+      "value": "tenant-uuid-placeholder",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. List Tenants",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/tenants?page=1&limit=10&status=active",
+          "host": ["{{base_url}}"],
+          "path": ["tenants"],
+          "query": [
+            {
+              "key": "page",
+              "value": "1",
+              "description": "Page number (default: 1)"
+            },
+            {
+              "key": "limit",
+              "value": "10",
+              "description": "Items per page (default: 10, max: 100)"
+            },
+            {
+              "key": "status",
+              "value": "active",
+              "description": "Filter by status (active, suspended, disabled)"
+            },
+            {
+              "key": "name",
+              "value": "",
+              "description": "Filter by tenant name (partial match)",
+              "disabled": true
+            },
+            {
+              "key": "code",
+              "value": "",
+              "description": "Filter by tenant code (partial match)",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has success field', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "});",
+              "",
+              "pm.test('Response has pagination', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.pagination).to.exist;",
+              "    pm.expect(jsonData.pagination.page).to.be.a('number');",
+              "    pm.expect(jsonData.pagination.total).to.be.a('number');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Get Tenant Details",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/tenants/{{tenant_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["tenants", "{{tenant_id}}"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response contains tenant data', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "    pm.expect(jsonData.data).to.exist;",
+              "    pm.expect(jsonData.data.id).to.be.a('string');",
+              "    pm.expect(jsonData.data.name).to.be.a('string');",
+              "    pm.expect(jsonData.data.code).to.be.a('string');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Create Tenant",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Test Tenant {{$randomInt}}\",\n  \"code\": \"TEST{{$randomInt}}\",\n  \"config\": {\n    \"maxUsers\": 50,\n    \"features\": [\"basic\"]\n  },\n  \"adminUser\": {\n    \"email\": \"admin{{$randomInt}}@test.com\",\n    \"name\": \"Test Admin\",\n    \"password\": \"password123\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/tenants",
+          "host": ["{{base_url}}"],
+          "path": ["tenants"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test('Tenant created successfully', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "    pm.expect(jsonData.data.tenant).to.exist;",
+              "    pm.expect(jsonData.data.tenant.id).to.be.a('string');",
+              "    ",
+              "    // Store tenant ID for subsequent requests",
+              "    pm.collectionVariables.set('tenant_id', jsonData.data.tenant.id);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Update Tenant",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Updated Test Tenant\",\n  \"config\": {\n    \"maxUsers\": 100,\n    \"features\": [\"basic\", \"premium\"]\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/tenants/{{tenant_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["tenants", "{{tenant_id}}"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Tenant updated successfully', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "    pm.expect(jsonData.data.name).to.equal('Updated Test Tenant');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Activate Tenant",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/tenants/{{tenant_id}}/activate",
+          "host": ["{{base_url}}"],
+          "path": ["tenants", "{{tenant_id}}", "activate"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Tenant activated', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "    pm.expect(jsonData.data.status).to.equal('active');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Suspend Tenant",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/tenants/{{tenant_id}}/suspend",
+          "host": ["{{base_url}}"],
+          "path": ["tenants", "{{tenant_id}}", "suspend"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Tenant suspended', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "    pm.expect(jsonData.data.status).to.equal('suspended');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Disable Tenant",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/tenants/{{tenant_id}}/disable",
+          "host": ["{{base_url}}"],
+          "path": ["tenants", "{{tenant_id}}", "disable"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Tenant disabled', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "    pm.expect(jsonData.data.status).to.equal('disabled');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Delete Tenant",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"confirmation\": \"DELETE_TENANT_{{tenant_id}}\",\n  \"reason\": \"testing\",\n  \"createBackup\": true\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/tenants/{{tenant_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["tenants", "{{tenant_id}}"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Tenant deletion initiated', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "    pm.expect(jsonData.data.cleanupResult).to.exist;",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": [
+          "// Ensure JWT token is set",
+          "if (!pm.collectionVariables.get('jwt_token')) {",
+          "    console.log('Warning: JWT token not set. Please set the jwt_token collection variable.');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "exec": [
+          "// Global test to check rate limiting headers",
+          "pm.test('Rate limiting headers present', function () {",
+          "    pm.expect(pm.response.headers.get('X-RateLimit-Limit')).to.exist;",
+          "    pm.expect(pm.response.headers.get('X-RateLimit-Remaining')).to.exist;",
+          "});"
+        ]
+      }
+    }
+  ]
+}
