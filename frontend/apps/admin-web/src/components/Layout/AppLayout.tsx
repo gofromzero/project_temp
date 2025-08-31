@@ -1,7 +1,7 @@
 import { Layout } from 'antd'
 import { ReactNode } from 'react'
 
-const { Header, Content, Sider } = Layout
+const { Header, Content } = Layout
 
 interface AppLayoutProps {
   children: ReactNode
