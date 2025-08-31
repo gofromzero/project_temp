@@ -1,0 +1,131 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: 123456
+          MYSQL_DATABASE: multi_tenant_admin
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      
+      redis:
+        image: redis:7.0-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+            
+      - name: Install dependencies
+        working-directory: ./backend
+        run: go mod download
+        
+      - name: Run Go format check
+        working-directory: ./backend
+        run: |
+          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+            echo "Go code is not formatted properly"
+            gofmt -s -l .
+            exit 1
+          fi
+          
+      - name: Run Go vet
+        working-directory: ./backend
+        run: go vet ./...
+        
+      - name: Run Go tests
+        working-directory: ./backend
+        run: go test ./... -v -race -coverprofile=coverage.out
+        
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./backend/coverage.out
+
+  frontend-test:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Cache Node modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+            
+      - name: Install dependencies
+        working-directory: ./frontend/apps/admin-web
+        run: npm ci
+        
+      - name: Run ESLint
+        working-directory: ./frontend/apps/admin-web
+        run: npm run lint
+        
+      - name: Run Prettier check
+        working-directory: ./frontend/apps/admin-web
+        run: npx prettier --check src/
+        
+      - name: Run TypeScript check
+        working-directory: ./frontend/apps/admin-web
+        run: npx tsc --noEmit
+        
+      - name: Run frontend tests
+        working-directory: ./frontend/apps/admin-web
+        run: npm test
+        
+      - name: Build frontend
+        working-directory: ./frontend/apps/admin-web
+        run: npm run build
+
+  build-and-deploy:
+    name: Build Docker Images
+    needs: [backend-test, frontend-test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build backend Docker image
+        run: |
+          docker build -f backend/Dockerfile -t multi-tenant-backend:latest ./backend
+          
+      - name: Build frontend Docker image
+        run: |
+          docker build -f frontend/apps/admin-web/Dockerfile -t multi-tenant-frontend:latest ./frontend/apps/admin-web

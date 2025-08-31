@@ -1,0 +1,23 @@
+server:
+  address: ":8000"
+  dumpRouterMap: false
+
+logger:
+  level: "all"
+  stdout: true
+
+database:
+  default:
+    host: "127.0.0.1"
+    port: "3306"
+    user: "root"
+    pass: "123456"
+    name: "multi_tenant_admin"
+    type: "mysql"
+    charset: "utf8mb4"
+    timezone: "Local"
+
+redis:
+  default:
+    address: "127.0.0.1:6379"
+    db: 0
