@@ -34,6 +34,15 @@ func NewAuthMiddleware(authService *auth.AuthService, publicPaths []string) (*Au
 	}, nil
 }
 
+// NewMinimalAuthMiddleware creates a minimal auth middleware for development/testing
+func NewMinimalAuthMiddleware(publicPaths []string) *AuthMiddleware {
+	return &AuthMiddleware{
+		jwtManager:  nil, // Will be set later when needed
+		authService: nil, // Will be set later when needed
+		publicPaths: publicPaths,
+	}
+}
+
 // AuthContextKey is the context key for storing authenticated user
 type AuthContextKey string
 
